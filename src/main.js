@@ -6,10 +6,17 @@ import VueRouter from 'vue-router';
 import App from './App.vue';
 import routes from './router';
 import store from './store';
+import VueQuillEditor from 'vue-quill-editor'
+
+// require styles
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
 
 Vue.config.productionTip = false;
 
 Vue.use(ElementUI);
+Vue.use(VueQuillEditor)
 
 let router = null;
 let instance = null;

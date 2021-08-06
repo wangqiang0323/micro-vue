@@ -1,10 +1,18 @@
 <template>
   <div class="home">
-    <quill-editor ref="myQuillEditor"></quill-editor>
-    <el-button type="primary" @click="getText">get text</el-button>
-    <el-button type="primary" @click="getContent">get contents</el-button>
-    <el-button type="primary" @click="insert">insert</el-button>
-    <el-button @click="dialogVisible = true" type="text">Open Dialog</el-button>
+    <el-container>
+      <el-aside width="300px">
+        <el-button type="default" @click="setActiveValue('恒大')">恒大</el-button>
+        <el-button type="default" @click="setActiveValue('二手房')">二手房</el-button>
+      </el-aside>
+      <el-main>
+        <quill-editor ref="myQuillEditor" v-model="content"></quill-editor>
+        <el-button type="primary" @click="getText">get text</el-button>
+        <el-button type="primary" @click="getContent">get contents</el-button>
+        <el-button type="primary" @click="insert">insert</el-button>
+        <el-button @click="dialogVisible = true" type="text">Open Dialog</el-button>
+      </el-main>
+    </el-container>
     <el-dialog
       :before-close="handleClose"
       :visible.sync="dialogVisible"
@@ -22,13 +30,22 @@
 
 <script>
   // @ is an alias to /src
-  import HelloWorld from '@/components/HelloWorld.vue';
-  import Delta from 'quill-delta';
+  import Delta from 'quill-delta'
+  import Quill from 'quill'
+  Quill.register('modules/counter', function(quill, options) {
+    debugger
+    var container = document.querySelector('#counter');
+    quill.on('text-change', function() {
+      var text = quill.getText();
+      console.log(text)
+      //用这种方法计算字数有几个问题，我们以后会解决
+      container.innerText = text.split(/\s+/).length;
+    });
+  });
 
   export default {
     name: 'home',
     components: {
-      HelloWorld,
     },
     computed: {
       editor() {
@@ -38,13 +55,19 @@
     data() {
       return {
         dialogVisible: false,
+        lastRangeIndex: 0,
+        content:''
       };
+    },
+    created() {
+
     },
     mounted() {
       const _this = this
+
       this.editor.on('selection-change', function(range, oldRange, source) {
-        debugger
         if (range) {
+          this.lastRangeIndex = range.index
           if (range.length === 0) {
             console.log('User cursor is on', range.index);
           } else {
@@ -58,6 +81,13 @@
       });
     },
     methods: {
+      setActiveValue(text) {
+        this.activeValue = text
+        console.log(this.lastRangeIndex)
+        this.editor.updateContents(new Delta()
+            .insert(text)
+        )
+      },
       handleClose(done) {
         this.$confirm('Sure to close？')
           .then(_ => {
